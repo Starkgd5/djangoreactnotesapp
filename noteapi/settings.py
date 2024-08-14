@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+
 from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -33,7 +34,8 @@ SECRET_KEY = config(
 DEBUG = config('DJANGO_DEBUG', cast=bool, default=False)
 
 # ALLOWED_HOSTS = []
-ALLOWED_HOSTS = config('DJANGO_ALLOWED_HOSTS', cast=str, default="*").split(",")
+ALLOWED_HOSTS = config('DJANGO_ALLOWED_HOSTS',
+                       cast=str, default="*").split(",")
 
 
 # Application definition
@@ -134,9 +136,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = "pt-br"
+LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "America/Sao_Paulo"
+TIME_ZONE = "UTC"
 
 USE_I18N = True
 
@@ -158,8 +160,9 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOW_ALL_ORIGINS = True
 
-# CORS_ALLOWED_ORIGINS = [
-#     "http://0.0.0.0:3000",
-# ]
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "https://localhost:3000",
+]

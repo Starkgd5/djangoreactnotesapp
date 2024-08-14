@@ -1,18 +1,6 @@
-version: '3.9'
+version: '3.29.1'
 
 services:
-  backend:
-    container_name: backend
-    build: 
-      context: .
-      dockerfile: docker/backend/Dockerfile
-    ports:
-      - "8000:8000"
-    env_file:
-      - ./.env
-    depends_on:
-      - db
-
   db:
     container_name: db
     image: postgres:15-alpine
@@ -22,10 +10,35 @@ services:
       - ./.env
     volumes:
       - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    container_name: backend
+    build:
+      context: .
+      dockerfile: docker/backend/Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./.env
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - static:/static
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 8000"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   frontend:
     container_name: frontend
-    build: 
+    build:
       context: .
       dockerfile: docker/frontend/Dockerfile
     ports:
@@ -34,20 +47,29 @@ services:
       - node_modules:/frontend/node_modules
     env_file:
       - ./.env
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 3000"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   nginx:
     container_name: nginx
-    build: 
+    build:
       context: .
       dockerfile: docker/nginx/Dockerfile
     ports:
-      - "80:80"
+      - "8080:80"
     volumes:
-      - static:/backend/static
-
+      - static:/static
     depends_on:
-      - backend
-      - frontend
+      backend:
+        condition: service_healthy
+      frontend:
+        condition: service_healthy
 
 volumes:
   db-data:
