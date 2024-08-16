@@ -18,4 +18,4 @@ RUN npm install
 RUN npm install -g serve
 
 # Comando de entrada para iniciar a aplicação
-CMD [ "serve", "-s", "build" ]
+CMD [ "npm", "run", "deploy" ]

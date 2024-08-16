@@ -9,7 +9,7 @@ const NotePage = () => {
 
   const fetchNote = useCallback(async () => {
     try {
-      const response = await fetch(`/api/notes/${noteId}/`);
+      const response = await fetch(`http://localhost:8000/api/notes/${noteId}/`);
       const data = await response.json();
       setNote(data);
     } catch (error) {
@@ -39,7 +39,7 @@ const NotePage = () => {
 
   const deleteNote = async () => {
     try {
-      await fetch(`/api/notes/${noteId}/`, {
+      await fetch(`http://localhost:8000/api/notes/${noteId}/`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -55,9 +55,9 @@ const NotePage = () => {
     if (noteId !== 'new' && note.body === '') {
       await deleteNote();
     } else if (noteId !== 'new') {
-      await saveNote('PUT', `/api/notes/${noteId}/`);
+      await saveNote('PUT', `http://localhost:8000/api/notes/${noteId}/`);
     } else if (noteId === 'new' && note.body !== '') {
-      await saveNote('POST', `/api/notes/`);
+      await saveNote('POST', `http://localhost:8000/api/notes/`);
     }
     navigate('/');
   };

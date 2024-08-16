@@ -1,24 +1,9 @@
-version: '3.29.1'
+version: '3.9'
 
 services:
-  db:
-    container_name: db
-    image: postgres:15-alpine
-    ports:
-      - "5432:5432"
-    env_file:
-      - ./.env
-    volumes:
-      - db-data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   backend:
     container_name: backend
-    build:
+    build: 
       context: .
       dockerfile: docker/backend/Dockerfile
     ports:
@@ -28,17 +13,34 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    volumes:
-      - static:/static
+    networks:
+      - djangoreactnotesapp_default
     healthcheck:
       test: ["CMD-SHELL", "nc -z localhost 8000"]
       interval: 10s
       timeout: 5s
       retries: 5
 
+  db:
+    container_name: db
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    env_file:
+      - ./.env
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - djangoreactnotesapp_default
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   frontend:
     container_name: frontend
-    build:
+    build: 
       context: .
       dockerfile: docker/frontend/Dockerfile
     ports:
@@ -50,6 +52,8 @@ services:
     depends_on:
       backend:
         condition: service_healthy
+    networks:
+      - djangoreactnotesapp_default
     healthcheck:
       test: ["CMD-SHELL", "nc -z localhost 3000"]
       interval: 10s
@@ -58,7 +62,7 @@ services:
 
   nginx:
     container_name: nginx
-    build:
+    build: 
       context: .
       dockerfile: docker/nginx/Dockerfile
     ports:
@@ -70,8 +74,14 @@ services:
         condition: service_healthy
       frontend:
         condition: service_healthy
+    networks:
+      - djangoreactnotesapp_default
 
 volumes:
   db-data:
   node_modules:
   static:
+
+networks:
+  djangoreactnotesapp_default:
+    driver: bridge
